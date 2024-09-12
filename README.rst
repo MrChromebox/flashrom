@@ -23,7 +23,10 @@ Please see the flashrom(8) manpage :doc:`classic_cli_manpage`.
 Building / installing / packaging
 ---------------------------------
 
-flashrom is built with **meson**. TLDR:
+flashrom supports building with **make** and **meson**.
+
+TLDR, building with meson
+"""""""""""""""""""""""""
 
 ::
 
@@ -34,6 +37,17 @@ flashrom is built with **meson**. TLDR:
 
 For full detailed instructions, follow the information in
 :doc:`dev_guide/building_from_source`
+
+TLDR, building with make
+""""""""""""""""""""""""
+
+::
+
+	make
+	make install
+
+For full detailed instructions, follow the information in
+:doc:`dev_guide/building_with_make`
 
 Contact
 -------
