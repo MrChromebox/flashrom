@@ -26,7 +26,10 @@ Information about recent releases can be found in :doc:`/release_notes/index`.
 Building / installing / packaging
 ---------------------------------
 
-flashrom is built with **meson**. TLDR:
+flashrom supports building with **make** and **meson**.
+
+TLDR, building with meson
+"""""""""""""""""""""""""
 
 ::
 
@@ -39,6 +42,17 @@ For full detailed instructions, follow the information in
 :doc:`dev_guide/building_from_source`.
 
 If you are interested in development, have a look at :doc:`dev_guide/development_guide`.
+
+TLDR, building with make
+""""""""""""""""""""""""
+
+::
+
+	make
+	make install
+
+For full detailed instructions, follow the information in
+:doc:`dev_guide/building_with_make`
 
 Contact
 -------
