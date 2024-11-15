@@ -49,6 +49,7 @@ enum {
 	OPTION_PROGRESS,
 	OPTION_SACRIFICE_RATIO,
 	OPTION_READ_REPEATED,
+	OPTION_USE_FIRST_CHIP,
 #if CONFIG_RPMC_ENABLED == 1
 	OPTION_RPMC_READ_DATA,
 	OPTION_RPMC_WRITE_ROOT_KEY,
@@ -89,6 +90,7 @@ struct cli_options {
 	const char *chip_to_probe;
 	int sacrifice_ratio;
 	int read_repeated;
+	bool use_first_chip;
 
 #if CONFIG_RPMC_ENABLED == 1
 	bool rpmc_read_data;
@@ -105,7 +107,7 @@ struct cli_options {
 static void cli_classic_usage(const char *name)
 {
 	printf("Usage: %s [-h|-R|-L|"
-	       "\n\t-p <programmername>[:<parameters>] [-c <chipname>]\n"
+	       "\n\t-p <programmername>[:<parameters>] [-c <chipname>| --use-first-chip]\n"
 	       "\t\t(--flash-name|--flash-size|\n"
 	       "\t\t [-E|-x|(-r|-w|-v) [<file>]]\n"
 	       "\t\t [(-l <layoutfile>|--ifd| --fmap|--fmap-file <file>) [-i <region>[:<file>]]...]\n"
@@ -127,6 +129,7 @@ static void cli_classic_usage(const char *name)
 	       " -N | --noverify-all                verify included regions only (cf. -i)\n"
 	       " -x | --extract                     extract regions to files\n"
 	       " -l | --layout <layoutfile>         read ROM layout from <layoutfile>\n"
+	       "      --use-first-chip              in cases where multiple chips are detected, use the first one found\n"
 	       "      --wp-disable                  disable write protection\n"
 	       "      --wp-enable                   enable write protection\n"
 	       "      --wp-list                     list supported write protection ranges\n"
@@ -1052,6 +1055,9 @@ static void parse_options(int argc, char **argv, const char *optstring,
 			}
 			options->filename = get_optional_filename(argv);
 			break;
+		case OPTION_USE_FIRST_CHIP:
+			options->use_first_chip = true;
+			break;
 #if CONFIG_RPMC_ENABLED == 1
 		case OPTION_RPMC_READ_DATA:
 			options->rpmc_read_data = true;
@@ -1157,6 +1163,7 @@ int main(int argc, char *argv[])
 		{"progress",		0, NULL, OPTION_PROGRESS},
 		{"sacrifice-ratio",	1, NULL, OPTION_SACRIFICE_RATIO},
 		{"read-repeated",	2, NULL, OPTION_READ_REPEATED},
+		{"use-first-chip",	0, NULL, OPTION_USE_FIRST_CHIP},
 #if CONFIG_RPMC_ENABLED == 1
 		{"get-rpmc-status",	0, NULL, OPTION_RPMC_READ_DATA},
 		{"write-root-key",	0, NULL, OPTION_RPMC_WRITE_ROOT_KEY},
@@ -1290,13 +1297,17 @@ int main(int argc, char *argv[])
 	}
 
 	if (all_matched_count > 1) {
-		msg_cinfo("Multiple flash chip definitions match the detected chip(s): \"%s\"",
-			  context->chip->name);
-		for (int ind = 1; ind < all_matched_count; ind++)
-			msg_cinfo(", \"%s\"", all_matched_names[ind]);
-		msg_cinfo("\nPlease specify which chip definition to use with the -c <chipname> option.\n");
-		ret = 1;
-		goto out_shutdown;
+		if (options.use_first_chip) {
+			all_matched_count = 1;
+		} else {
+			msg_cinfo("Multiple flash chip definitions match the detected chip(s): \"%s\"",
+				  context->chip->name);
+			for (int ind = 1; ind < all_matched_count; ind++)
+				msg_cinfo(", \"%s\"", all_matched_names[ind]);
+			msg_cinfo("\nPlease specify which chip definition to use with the -c <chipname> option.\n");
+			ret = 1;
+			goto out_shutdown;
+		}
 	} else if (!all_matched_count) {
 		msg_cinfo("No EEPROM/flash device found.\n");
 		if (!options.force || !options.chip_to_probe) {
