@@ -24,3 +24,6 @@ target/
 # Meson
 # Workaround for Meson v1.9.0 https://github.com/mesonbuild/meson/issues/14948
 /subprojects/.wraplock
+
+# Local pinned pciutils build (see build-meson.sh)
+/deps/
